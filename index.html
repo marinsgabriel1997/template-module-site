@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Painel</title>
+    <link rel="stylesheet" href="./assets/css/global.css" />
+    <link rel="stylesheet" href="./assets/css/layout.css" />
+    <link rel="stylesheet" href="./assets/css/sidebar.css" />
+    <link rel="stylesheet" href="./assets/css/theme.css" />
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <h2>Painel</h2>
+        <nav>
+          <a href="./modulos/configuracoes/index.html">Configuracoes</a>
+          <a href="./modulos/modulo-01/index.html">Modulo 01</a>
+          <a href="./modulos/modulo-02/index.html">Modulo 02</a>
+          <a href="./modulos/modulo-03/index.html">Modulo 03</a>
+        </nav>
+      </aside>
+      <main class="content">
+        <header class="page-header">
+          <h1>Dashboard Principal</h1>
+          <p>Escolha um modulo no menu lateral esquerdo.</p>
+        </header>
+        <section class="card">
+          <h2>Estado da Aplicacao</h2>
+          <p>Template em camadas: frontend, backend local e persistencia em IndexedDB.</p>
+          <p>Cada modulo opera em rota propria, sem iframe.</p>
+          <p>Atualizacao de dados por acao manual em cada modulo.</p>
+        </section>
+      </main>
+    </div>
+    <script src="./assets/js/backend/indexeddb-wrapper.js"></script>
+    <script src="./assets/js/backend/preferences-storage.js"></script>
+    <script src="./assets/js/backend/state-store.js"></script>
+    <script src="./assets/js/backend/action-dispatcher.js"></script>
+    <script src="./assets/js/frontend/sidebar.js"></script>
+  </body>
+</html>

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Configuracoes</title>
+    <link rel="stylesheet" href="../../assets/css/global.css" />
+    <link rel="stylesheet" href="../../assets/css/layout.css" />
+    <link rel="stylesheet" href="../../assets/css/sidebar.css" />
+    <link rel="stylesheet" href="../../assets/css/theme.css" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <h2>Painel</h2>
+        <nav>
+          <a href="../../modulos/configuracoes/index.html">Configuracoes</a>
+          <a href="../../modulos/modulo-01/index.html">Modulo 01</a>
+          <a href="../../modulos/modulo-02/index.html">Modulo 02</a>
+          <a href="../../modulos/modulo-03/index.html">Modulo 03</a>
+        </nav>
+      </aside>
+      <main class="content settings-content">
+        <header class="settings-header">
+          <div>
+            <h1>Configuracoes</h1>
+            <p>Ajustes globais do sistema.</p>
+          </div>
+          <div class="settings-header-actions">
+            <span class="settings-save-status" data-role="save-status">Sem alteracoes</span>
+            <button type="button" class="btn btn-primary" data-action="save-settings" disabled>Salvar configuracoes</button>
+          </div>
+        </header>
+
+        <section class="card settings-section">
+          <h2>Configuracoes de Log</h2>
+          <p class="settings-section-description">Os logs seguem o nivel configurado e sao armazenados no IndexedDB.</p>
+
+          <div class="settings-grid">
+            <label class="settings-field">
+              <span>Nivel de log</span>
+              <select data-field="log-level">
+                <option value="ERROR">ERROR</option>
+                <option value="WARN">WARN</option>
+                <option value="INFO">INFO</option>
+                <option value="DEBUG">DEBUG</option>
+              </select>
+            </label>
+
+            <label class="settings-field">
+              <span>Limite de linhas de log</span>
+              <input type="number" min="1" step="1" data-field="log-max-lines" />
+            </label>
+          </div>
+
+          <div class="actions">
+            <button type="button" class="btn" data-action="generate-log">Gerar log de teste</button>
+            <button type="button" class="btn" data-action="clear-logs">Limpar logs</button>
+            <button type="button" class="btn" data-action="download-logs">Baixar logs</button>
+          </div>
+
+          <p class="settings-meta" data-role="logs-meta">Logs armazenados: 0</p>
+        </section>
+
+        <section class="card settings-section">
+          <h2>Gerenciamento de Dados</h2>
+          <p class="settings-section-description">Acoes de limpeza de dados persistidos no IndexedDB e no storage de preferencias.</p>
+
+          <div class="actions">
+            <button type="button" class="btn" data-action="clear-module-data">Limpar dados de modulos</button>
+            <button type="button" class="btn" data-action="clear-preferences">Limpar configuracoes</button>
+            <button type="button" class="btn btn-danger" data-action="delete-indexeddb">Apagar IndexedDB</button>
+            <button type="button" class="btn btn-danger" data-action="clear-all-data">Limpar todos os dados</button>
+          </div>
+        </section>
+
+        <section class="card settings-section">
+          <h2>Status</h2>
+          <p data-role="feedback">Pronto.</p>
+        </section>
+      </main>
+    </div>
+
+    <script src="../../assets/js/backend/indexeddb-wrapper.js"></script>
+    <script src="../../assets/js/backend/preferences-storage.js"></script>
+    <script src="../../assets/js/backend/state-store.js"></script>
+    <script src="../../assets/js/backend/action-dispatcher.js"></script>
+    <script src="../../assets/js/frontend/sidebar.js"></script>
+    <script src="../../assets/js/frontend/logger.js"></script>
+    <script src="./script.js"></script>
+  </body>
+</html>
