@@ -28,7 +28,7 @@
             <p>Ajustes globais do sistema.</p>
           </div>
           <div class="settings-header-actions">
-            <span class="settings-save-status" data-role="save-status">Sem alteracoes</span>
+            <span class="settings-save-status" data-role="save-status" role="status" aria-live="polite">Sem alteracoes</span>
             <button type="button" class="btn btn-primary" data-action="save-settings" disabled>Salvar configuracoes</button>
           </div>
         </header>
@@ -60,7 +60,7 @@
             <button type="button" class="btn" data-action="download-logs">Baixar logs</button>
           </div>
 
-          <p class="settings-meta" data-role="logs-meta">Logs armazenados: 0</p>
+          <p class="settings-meta" data-role="logs-meta" role="status" aria-live="polite">Logs armazenados: 0</p>
         </section>
 
         <section class="card settings-section">
@@ -77,7 +77,7 @@
 
         <section class="card settings-section">
           <h2>Status</h2>
-          <p data-role="feedback">Pronto.</p>
+          <p data-role="feedback" role="status" aria-live="polite">Pronto.</p>
         </section>
       </main>
     </div>

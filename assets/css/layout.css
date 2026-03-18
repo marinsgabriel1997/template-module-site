@@ -43,3 +43,13 @@
 .btn:hover {
   filter: brightness(0.97);
 }
+
+.btn:focus-visible,
+.content a:focus-visible,
+.content button:focus-visible,
+.content input:focus-visible,
+.content select:focus-visible,
+.content textarea:focus-visible {
+  outline: 3px solid #2563eb;
+  outline-offset: 2px;
+}

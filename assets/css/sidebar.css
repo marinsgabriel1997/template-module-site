@@ -26,3 +26,9 @@
 .sidebar nav a.active {
   background: var(--color-sidebar-active-bg);
 }
+
+.sidebar nav a:focus-visible {
+  outline: 3px solid #93c5fd;
+  outline-offset: 2px;
+  background: var(--color-sidebar-active-bg);
+}
