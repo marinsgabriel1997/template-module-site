@@ -5,6 +5,8 @@
   var STORE_SETTINGS = "settings";
   var STORE_LOGS = "logs";
   var SETTINGS_ID = "global";
+  var dbConnection = null;
+  var dbPromise = null;
 
   function shouldPersistIndexedDBLog(db) {
     if (!db.objectStoreNames.contains(STORE_SETTINGS)) {
@@ -66,7 +68,15 @@
   }
 
   function openDB() {
-    return new Promise(function (resolve, reject) {
+    if (dbConnection) {
+      return Promise.resolve(dbConnection);
+    }
+
+    if (dbPromise) {
+      return dbPromise;
+    }
+
+    dbPromise = new Promise(function (resolve, reject) {
       var request = indexedDB.open(DB_NAME, DB_VERSION);
 
       request.onupgradeneeded = function () {
@@ -83,13 +93,24 @@
       };
 
       request.onsuccess = function () {
-        resolve(request.result);
+        dbConnection = request.result;
+        dbConnection.onversionchange = function () {
+          if (dbConnection) {
+            dbConnection.close();
+          }
+          dbConnection = null;
+          dbPromise = null;
+        };
+        resolve(dbConnection);
       };
 
       request.onerror = function () {
+        dbPromise = null;
         reject(request.error || new Error("Falha ao abrir IndexedDB"));
       };
     });
+
+    return dbPromise;
   }
 
   function getById(storeName, id) {
@@ -117,8 +138,6 @@
             reject(req.error || new Error("Falha ao buscar registro"));
           });
         };
-      }).finally(function () {
-        db.close();
       });
     });
   }
@@ -147,8 +166,6 @@
             reject(req.error || new Error("Falha ao salvar registro"));
           });
         };
-      }).finally(function () {
-        db.close();
       });
     });
   }
@@ -176,8 +193,6 @@
             reject(req.error || new Error("Falha ao adicionar registro"));
           });
         };
-      }).finally(function () {
-        db.close();
       });
     });
   }
@@ -205,8 +220,6 @@
             reject(req.error || new Error("Falha ao listar registros"));
           });
         };
-      }).finally(function () {
-        db.close();
       });
     });
   }
@@ -235,8 +248,6 @@
             reject(req.error || new Error("Falha ao remover registro"));
           });
         };
-      }).finally(function () {
-        db.close();
       });
     });
   }
@@ -263,13 +274,17 @@
             reject(req.error || new Error("Falha ao limpar store"));
           });
         };
-      }).finally(function () {
-        db.close();
       });
     });
   }
 
   function deleteDatabase() {
+    if (dbConnection) {
+      dbConnection.close();
+      dbConnection = null;
+    }
+    dbPromise = null;
+
     return new Promise(function (resolve, reject) {
       var request = indexedDB.deleteDatabase(DB_NAME);
 
