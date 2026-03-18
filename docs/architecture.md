@@ -69,6 +69,14 @@ template-sites/
 - Mantenha cada modulo em arquivo `index.html` proprio dentro de `modulos/`.
 - Garanta funcionamento em ambiente local e em GitHub Pages (base path de repositorio).
 
+## Sidebar compartilhada
+
+- Nao replique HTML da sidebar em cada pagina.
+- Em cada `index.html`, use somente `<aside class="sidebar" data-sidebar></aside>`.
+- A montagem do menu deve ser feita por `assets/js/frontend/sidebar.js`.
+- Defina itens e ordem da navegacao em uma unica fonte de verdade (`NAV_ITEMS` no `sidebar.js`).
+- O script deve manter o link `Painel` para a home, ajustar `href` relativo por rota e marcar item ativo.
+
 ## Fluxo obrigatorio
 
 `UI -> backend local -> persistencia -> resposta -> re-render`

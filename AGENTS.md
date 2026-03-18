@@ -18,10 +18,12 @@ Esta pasta base inicia novos sites com arquitetura em camadas (`frontend` + `bac
 - `backend local`: regras de negocio, orquestracao de estado e acesso a dados.
 - `data layer`: wrapper de IndexedDB e repositorios.
 - Cada modulo em sua propria rota em `modulos/`.
-- Sidebar fixa em todas as paginas.
+- Sidebar compartilhada injetada por `assets/js/frontend/sidebar.js` em todas as paginas.
 - Use rotas HTML dedicadas por modulo.
 - Use links relativos entre paginas (`./` e `../`) para compatibilidade local e GitHub Pages.
 - Publique e teste sempre com base path de repositorio (ex.: `/nome-do-repo/` no GitHub Pages).
+- Em cada `index.html`, use apenas o container `<aside class="sidebar" data-sidebar></aside>`.
+- Mantenha itens e ordem do menu em um unico ponto (`NAV_ITEMS` no `assets/js/frontend/sidebar.js`).
 
 ## Regras obrigatorias
 

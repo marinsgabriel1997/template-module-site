@@ -5,6 +5,7 @@
 - Arquitetura em camadas (`frontend`, `backend local`, `data`).
 - Modulos por rota com `index.html` dedicado.
 - Navegacao com links relativos compativeis com local e GitHub Pages.
+- Sidebar compartilhada por injecao JS via `assets/js/frontend/sidebar.js` e container `data-sidebar`.
 - Persistencia principal em IndexedDB com acesso via backend local.
 - Politica de logs por nivel (`ERROR`, `WARN`, `INFO`, `DEBUG`).
 - Atualizacao manual de dados por modulo.
@@ -15,7 +16,7 @@
 
 - [ ] Definir objetivo do produto e publico alvo.
 - [ ] Definir escopo do MVP.
-- [ ] Definir modulos reais e ordem no menu lateral.
+- [ ] Definir modulos reais e ordem no menu lateral em `NAV_ITEMS` do `assets/js/frontend/sidebar.js`.
 
 ### Dominio e regras de negocio
 

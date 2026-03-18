@@ -25,6 +25,8 @@ Iniciar um novo site baseado em modulos por rota, com separacao de `frontend` e 
 - Cada modulo em sua propria rota.
 - Use rotas HTML dedicadas por modulo.
 - Use navegacao com links relativos (`./` e `../`) em toda sidebar/menu.
+- Nao copie a sidebar entre paginas. Use `<aside class="sidebar" data-sidebar></aside>` em cada `index.html`.
+- Centralize menu e ordem dos modulos em `assets/js/frontend/sidebar.js` (array `NAV_ITEMS`).
 - O `script.js` de cada modulo deve inicializar sua propria pagina.
 - Expor API publica do modulo e opcional; prefira inicializacao direta quando o modulo for simples.
 - Validar links no ambiente local e no GitHub Pages antes de publicar.
@@ -36,10 +38,11 @@ Iniciar um novo site baseado em modulos por rota, com separacao de `frontend` e 
 
 ## Checklist
 
-- [ ] Definir menu lateral e ordem dos modulos.
+- [ ] Definir menu lateral e ordem dos modulos no `NAV_ITEMS` de `assets/js/frontend/sidebar.js`.
 - [ ] Implementar actions no `action-dispatcher`.
 - [ ] Validar leitura/escrita no IndexedDB wrapper.
 - [ ] Garantir acesso ao IndexedDB somente pela camada backend local.
+- [ ] Garantir que cada pagina usa `<aside class="sidebar" data-sidebar></aside>`.
 - [ ] Validar botao de `Atualizar dados` em cada modulo.
 - [ ] Validar contrato de erro padronizado.
 - [ ] Validar cobertura minima de logs por modulo (`INFO`, `ERROR`).

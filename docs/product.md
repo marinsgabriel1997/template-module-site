@@ -21,7 +21,7 @@ Preencha este documento antes da implementacao.
 ## Modulos
 
 - Modulos previstos:
-- Ordem no menu lateral:
+- Ordem no menu lateral (refletir em `NAV_ITEMS` do `assets/js/frontend/sidebar.js`):
 - Responsabilidade de cada modulo:
 
 ## Camadas
