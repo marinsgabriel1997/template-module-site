@@ -11,6 +11,17 @@
   font-size: 20px;
 }
 
+.sidebar-home-link {
+  display: inline-block;
+  color: inherit;
+}
+
+.sidebar-home-link:focus-visible {
+  outline: 3px solid #93c5fd;
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
 .sidebar nav {
   display: flex;
   flex-direction: column;
