@@ -13,6 +13,10 @@
     var statusEl = document.querySelector('[data-role="module-status"]');
     var refreshBtn = document.querySelector('[data-action="refresh-state"]');
 
+    function render(state) {
+      setText(statusEl, formatState(state));
+    }
+
     function reload() {
       logger.info("Recarregamento manual iniciado");
       global.TemplateBackend.dispatch(global.TemplateBackend.ACTIONS.RELOAD_MODULE_DATA, { moduleId: moduleId }).then(function (result) {
@@ -22,25 +26,30 @@
           return;
         }
         logger.info("Dados recarregados", { lastLoadedAt: result.response.lastLoadedAt });
-        setText(statusEl, formatState(result.response));
+        render(result.response);
       });
     }
 
+    function setupEventListeners() {
+      if (refreshBtn) {
+        refreshBtn.addEventListener("click", reload);
+      }
+    }
+
     logger.info("Inicializacao do modulo iniciada");
-    global.TemplateBackend.dispatch(global.TemplateBackend.ACTIONS.GET_INITIAL_DATA, { moduleId: moduleId }).then(function (result) {
+    setupEventListeners();
+
+    return global.TemplateBackend.dispatch(global.TemplateBackend.ACTIONS.GET_INITIAL_DATA, { moduleId: moduleId }).then(function (result) {
       if (!result.ok) {
         logger.error("Falha ao carregar dados iniciais", result.error);
         setText(statusEl, "Erro inicial: " + result.error.message);
-        return;
+        return result;
       }
       logger.info("Dados iniciais carregados", { lastLoadedAt: result.response.lastLoadedAt });
       logger.info("Inicializacao do modulo concluida");
-      setText(statusEl, formatState(result.response));
+      render(result.response);
+      return result;
     });
-
-    if (refreshBtn) {
-      refreshBtn.addEventListener("click", reload);
-    }
   }
 
   global.TemplateFrontend = global.TemplateFrontend || {};

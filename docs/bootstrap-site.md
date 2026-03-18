@@ -25,6 +25,8 @@ Iniciar um novo site baseado em modulos por rota, com separacao de `frontend` e 
 - Cada modulo em sua propria rota.
 - Use rotas HTML dedicadas por modulo.
 - Use navegacao com links relativos (`./` e `../`) em toda sidebar/menu.
+- O `script.js` de cada modulo deve inicializar sua propria pagina.
+- Expor API publica do modulo e opcional; prefira inicializacao direta quando o modulo for simples.
 - Validar links no ambiente local e no GitHub Pages antes de publicar.
 - IndexedDB como persistencia principal.
 - `localStorage` apenas para preferencias simples.

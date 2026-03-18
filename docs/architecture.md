@@ -50,6 +50,13 @@ template-sites/
 - `backend local`: actions, regras de negocio, consolidacao de estado.
 - `data`: wrapper IndexedDB e repositorios.
 
+## Convencao de modulos
+
+- Cada modulo deve ter `index.html`, `style.css` e `script.js`.
+- O `script.js` do modulo deve inicializar a pagina e conectar a UI ao backend local.
+- O modulo pode usar helpers compartilhados do `frontend` para evitar repeticao.
+- Expor API publica do modulo (`init`, `render`, etc.) e opcional; so faca isso quando outro codigo realmente precisar chamar esses metodos.
+
 ## Observabilidade
 
 - Use `TemplateFrontend.logger.createLogger("<modulo>")` em cada modulo.

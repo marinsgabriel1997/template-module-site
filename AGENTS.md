@@ -44,7 +44,8 @@ Esta pasta base inicia novos sites com arquitetura em camadas (`frontend` + `bac
 
 ## Convencoes de modulos
 
-- Modulos de UI devem expor `init`, `setupEventListeners` e `render`.
+- Modulos de UI devem ter `script.js` responsavel por inicializar a propria pagina.
+- Expor API publica do modulo (`init`, `render`, etc.) e opcional e so deve acontecer quando outro codigo realmente precisar acionar esses metodos.
 - Camada de estado/backend deve expor `dispatch` e `getState`.
 - Nomes de `action` no padrao verbo + entidade (`getInitialData`, `saveModuleData`).
 - Navegacao interna deve evitar `href` absoluto iniciado por `/`.
