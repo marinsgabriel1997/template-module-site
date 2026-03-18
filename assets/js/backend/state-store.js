@@ -150,10 +150,14 @@
     });
   }
 
-  function clearPreferencesData() {
+  function clearLocalPreferences() {
+    var clearedPreferences = global.TemplatePreferences.clearAll();
+    return Promise.resolve({ clearedPreferences: clearedPreferences });
+  }
+
+  function clearSettingsData() {
     return global.TemplateIndexedDB.clearStore(global.TemplateIndexedDB.stores.SETTINGS).then(function () {
-      var clearedPreferences = global.TemplatePreferences.clearAll();
-      return { clearedPreferences: clearedPreferences, clearedSettings: true };
+      return { clearedSettings: true };
     });
   }
 
@@ -198,7 +202,8 @@
     exportLogs: exportLogs,
     clearAllModuleData: clearAllModuleData,
     clearAllData: clearAllData,
-    clearPreferencesData: clearPreferencesData,
+    clearLocalPreferences: clearLocalPreferences,
+    clearSettingsData: clearSettingsData,
     deleteIndexedDBDatabase: deleteIndexedDBDatabase
   };
 })(window);

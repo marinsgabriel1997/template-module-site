@@ -65,13 +65,14 @@
 
         <section class="card settings-section">
           <h2>Gerenciamento de Dados</h2>
-          <p class="settings-section-description">Acoes de limpeza de dados persistidos no IndexedDB e no storage de preferencias.</p>
+          <p class="settings-section-description">Acoes separadas para dados de modulos, configuracoes persistidas e preferencias locais.</p>
 
           <div class="actions">
             <button type="button" class="btn" data-action="clear-module-data">Limpar dados de modulos</button>
-            <button type="button" class="btn" data-action="clear-preferences">Limpar configuracoes</button>
-            <button type="button" class="btn btn-danger" data-action="delete-indexeddb">Apagar IndexedDB</button>
+            <button type="button" class="btn" data-action="clear-settings">Limpar configuracoes persistidas</button>
+            <button type="button" class="btn" data-action="clear-preferences">Limpar preferencias locais</button>            
             <button type="button" class="btn btn-danger" data-action="clear-all-data">Limpar todos os dados</button>
+            <button type="button" class="btn btn-danger" data-action="delete-indexeddb">Apagar IndexedDB</button>
           </div>
         </section>
 

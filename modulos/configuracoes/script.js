@@ -17,6 +17,7 @@
     clearLogsButton: document.querySelector('[data-action="clear-logs"]'),
     downloadLogsButton: document.querySelector('[data-action="download-logs"]'),
     clearModuleDataButton: document.querySelector('[data-action="clear-module-data"]'),
+    clearSettingsButton: document.querySelector('[data-action="clear-settings"]'),
     clearPreferencesButton: document.querySelector('[data-action="clear-preferences"]'),
     deleteIndexedDBButton: document.querySelector('[data-action="delete-indexeddb"]'),
     clearAllDataButton: document.querySelector('[data-action="clear-all-data"]')
@@ -213,19 +214,35 @@
       });
   }
 
-  function clearPreferences() {
-    if (!confirmPendingBeforeCleanup("Limpar configuracoes")) return;
+  function clearSettings() {
+    if (!confirmPendingBeforeCleanup("Limpar configuracoes persistidas")) return;
 
-    logger.info("Limpeza de configuracoes iniciada");
-    runAction(global.TemplateBackend.ACTIONS.CLEAR_PREFERENCES)
+    logger.info("Limpeza de configuracoes persistidas iniciada");
+    runAction(global.TemplateBackend.ACTIONS.CLEAR_SETTINGS)
       .then(function () {
-        logger.info("Limpeza de configuracoes concluida");
-        setFeedback("Configuracoes removidas.");
+        logger.info("Limpeza de configuracoes persistidas concluida");
+        setFeedback("Configuracoes persistidas removidas.");
         window.location.reload();
       })
       .catch(function (error) {
-        logger.error("Falha ao limpar configuracoes", { message: error.message });
-        setFeedback("Erro ao limpar configuracoes: " + error.message);
+        logger.error("Falha ao limpar configuracoes persistidas", { message: error.message });
+        setFeedback("Erro ao limpar configuracoes persistidas: " + error.message);
+      });
+  }
+
+  function clearPreferences() {
+    if (!confirmPendingBeforeCleanup("Limpar preferencias locais")) return;
+
+    logger.info("Limpeza de preferencias locais iniciada");
+    runAction(global.TemplateBackend.ACTIONS.CLEAR_LOCAL_PREFERENCES)
+      .then(function () {
+        logger.info("Limpeza de preferencias locais concluida");
+        setFeedback("Preferencias locais removidas.");
+        window.location.reload();
+      })
+      .catch(function (error) {
+        logger.error("Falha ao limpar preferencias locais", { message: error.message });
+        setFeedback("Erro ao limpar preferencias locais: " + error.message);
       });
   }
 
@@ -272,6 +289,7 @@
     elements.clearLogsButton.addEventListener("click", clearLogs);
     elements.downloadLogsButton.addEventListener("click", downloadLogs);
     elements.clearModuleDataButton.addEventListener("click", clearModuleData);
+    elements.clearSettingsButton.addEventListener("click", clearSettings);
     elements.clearPreferencesButton.addEventListener("click", clearPreferences);
     elements.deleteIndexedDBButton.addEventListener("click", deleteIndexedDBDatabase);
     elements.clearAllDataButton.addEventListener("click", clearAllData);

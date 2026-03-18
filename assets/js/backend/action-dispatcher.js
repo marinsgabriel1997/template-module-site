@@ -10,7 +10,8 @@
     CLEAR_LOGS: "clearLogs",
     EXPORT_LOGS: "exportLogs",
     CLEAR_ALL_MODULE_DATA: "clearAllModuleData",
-    CLEAR_PREFERENCES: "clearPreferences",
+    CLEAR_LOCAL_PREFERENCES: "clearLocalPreferences",
+    CLEAR_SETTINGS: "clearSettings",
     CLEAR_ALL_DATA: "clearAllData",
     DELETE_INDEXEDDB_DATABASE: "deleteIndexedDBDatabase"
   };
@@ -135,9 +136,14 @@
           return global.TemplateStateStore.clearAllModuleData();
         });
 
-      case ACTIONS.CLEAR_PREFERENCES:
+      case ACTIONS.CLEAR_LOCAL_PREFERENCES:
         return safe(function () {
-          return global.TemplateStateStore.clearPreferencesData();
+          return global.TemplateStateStore.clearLocalPreferences();
+        });
+
+      case ACTIONS.CLEAR_SETTINGS:
+        return safe(function () {
+          return global.TemplateStateStore.clearSettingsData();
         });
 
       case ACTIONS.CLEAR_ALL_DATA:
