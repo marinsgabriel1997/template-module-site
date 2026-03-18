@@ -6,18 +6,25 @@
     logMaxLines: 5000
   };
 
-  var moduleState = {
-    moduleId: null,
-    lastLoadedAt: null,
-    data: null
-  };
+  var moduleStates = {};
 
-  function getModuleState() {
+  function createModuleState(moduleId, data, lastLoadedAt) {
     return {
-      moduleId: moduleState.moduleId,
-      lastLoadedAt: moduleState.lastLoadedAt,
-      data: moduleState.data
+      moduleId: moduleId,
+      lastLoadedAt: lastLoadedAt,
+      data: data
     };
+  }
+
+  function getModuleState(moduleId) {
+    if (!moduleId) return null;
+
+    if (!Object.prototype.hasOwnProperty.call(moduleStates, moduleId)) {
+      return null;
+    }
+
+    var state = moduleStates[moduleId];
+    return createModuleState(state.moduleId, state.data, state.lastLoadedAt);
   }
 
   function normalizeLogLevel(level) {
@@ -60,10 +67,8 @@
 
   function loadModuleState(moduleId) {
     return global.TemplateIndexedDB.getById(global.TemplateIndexedDB.stores.MODULE_DATA, moduleId).then(function (record) {
-      moduleState.moduleId = moduleId;
-      moduleState.lastLoadedAt = new Date().toISOString();
-      moduleState.data = record ? record.payload : null;
-      return getModuleState();
+      moduleStates[moduleId] = createModuleState(moduleId, record ? record.payload : null, new Date().toISOString());
+      return getModuleState(moduleId);
     });
   }
 
@@ -127,7 +132,10 @@
   }
 
   function clearAllModuleData() {
-    return global.TemplateIndexedDB.clearStore(global.TemplateIndexedDB.stores.MODULE_DATA);
+    return global.TemplateIndexedDB.clearStore(global.TemplateIndexedDB.stores.MODULE_DATA).then(function () {
+      moduleStates = {};
+      return true;
+    });
   }
 
   function clearAllData() {
@@ -136,6 +144,7 @@
       global.TemplateIndexedDB.clearStore(global.TemplateIndexedDB.stores.SETTINGS),
       global.TemplateIndexedDB.clearStore(global.TemplateIndexedDB.stores.LOGS)
     ]).then(function () {
+      moduleStates = {};
       var clearedPreferences = global.TemplatePreferences.clearAll();
       return { clearedPreferences: clearedPreferences };
     });
@@ -150,11 +159,7 @@
 
   function deleteIndexedDBDatabase() {
     return global.TemplateIndexedDB.deleteDatabase().then(function () {
-      moduleState = {
-        moduleId: null,
-        lastLoadedAt: null,
-        data: null
-      };
+      moduleStates = {};
       return { deleted: true };
     });
   }
