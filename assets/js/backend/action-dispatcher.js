@@ -26,6 +26,54 @@
     return { ok: true, response: response };
   }
 
+  function hasOwn(obj, key) {
+    return Object.prototype.hasOwnProperty.call(obj, key);
+  }
+
+  function isNonEmptyString(value) {
+    return typeof value === "string" && value.trim() !== "";
+  }
+
+  function validatePayload(action, payload) {
+    var data = payload || {};
+
+    switch (action) {
+      case ACTIONS.GET_INITIAL_DATA:
+      case ACTIONS.RELOAD_MODULE_DATA:
+        if (!isNonEmptyString(data.moduleId)) {
+          return fail("MODULE_ID_REQUIRED", "moduleId obrigatorio para carregar dados do modulo");
+        }
+        return null;
+
+      case ACTIONS.SAVE_MODULE_DATA:
+        if (!isNonEmptyString(data.moduleId)) {
+          return fail("MODULE_ID_REQUIRED", "moduleId obrigatorio para salvar dados do modulo");
+        }
+        if (!hasOwn(data, "data")) {
+          return fail("MODULE_DATA_REQUIRED", "data obrigatorio para salvar dados do modulo");
+        }
+        return null;
+
+      case ACTIONS.SAVE_SETTINGS:
+        if (!data.settings || typeof data.settings !== "object" || Array.isArray(data.settings)) {
+          return fail("SETTINGS_REQUIRED", "settings obrigatorio e deve ser um objeto");
+        }
+        return null;
+
+      case ACTIONS.WRITE_LOG:
+        if (!isNonEmptyString(data.level)) {
+          return fail("LOG_LEVEL_REQUIRED", "level obrigatorio para gravar log");
+        }
+        if (!isNonEmptyString(data.message)) {
+          return fail("LOG_MESSAGE_REQUIRED", "message obrigatorio para gravar log");
+        }
+        return null;
+
+      default:
+        return null;
+    }
+  }
+
   function safe(actionRunner) {
     return actionRunner().then(success).catch(function (error) {
       return fail("ACTION_FAILED", error && error.message ? error.message : "Falha na acao");
@@ -34,6 +82,11 @@
 
   function dispatch(action, payload) {
     var data = payload || {};
+    var validationError = validatePayload(action, data);
+
+    if (validationError) {
+      return Promise.resolve(validationError);
+    }
 
     switch (action) {
       case ACTIONS.GET_INITIAL_DATA:
