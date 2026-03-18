@@ -4,6 +4,66 @@
   var STORE_MODULE_DATA = "module_data";
   var STORE_SETTINGS = "settings";
   var STORE_LOGS = "logs";
+  var SETTINGS_ID = "global";
+
+  function shouldPersistIndexedDBLog(db) {
+    if (!db.objectStoreNames.contains(STORE_SETTINGS)) {
+      return Promise.resolve(false);
+    }
+
+    return new Promise(function (resolve) {
+      var tx = db.transaction(STORE_SETTINGS, "readonly");
+      var store = tx.objectStore(STORE_SETTINGS);
+      var req = store.get(SETTINGS_ID);
+
+      req.onsuccess = function () {
+        var record = req.result;
+        var payload = record && record.payload ? record.payload : null;
+        var logLevel = payload && payload.logLevel ? String(payload.logLevel).toUpperCase() : "INFO";
+        resolve(logLevel === "DEBUG");
+      };
+
+      req.onerror = function () {
+        resolve(false);
+      };
+    });
+  }
+
+  function persistIndexedDBLog(db, level, message, additionalData, storeName) {
+    if (storeName === STORE_LOGS) {
+      return Promise.resolve(false);
+    }
+
+    if (!db.objectStoreNames.contains(STORE_LOGS)) {
+      return Promise.resolve(false);
+    }
+
+    return shouldPersistIndexedDBLog(db).then(function (enabled) {
+      if (!enabled) return false;
+
+      return new Promise(function (resolve) {
+        var tx = db.transaction(STORE_LOGS, "readwrite");
+        var store = tx.objectStore(STORE_LOGS);
+        var req = store.add({
+          level: level,
+          module: "indexeddb-wrapper",
+          message: message,
+          additionalData: additionalData || null,
+          createdAt: new Date().toISOString()
+        });
+
+        req.onsuccess = function () {
+          resolve(true);
+        };
+
+        req.onerror = function () {
+          resolve(false);
+        };
+      });
+    }).catch(function () {
+      return false;
+    });
+  }
 
   function openDB() {
     return new Promise(function (resolve, reject) {
@@ -40,10 +100,22 @@
         var req = store.get(id);
 
         req.onsuccess = function () {
-          resolve(req.result || null);
+          persistIndexedDBLog(db, "DEBUG", "Leitura por id concluida", {
+            storeName: storeName,
+            id: id,
+            found: !!req.result
+          }, storeName).then(function () {
+            resolve(req.result || null);
+          });
         };
         req.onerror = function () {
-          reject(req.error || new Error("Falha ao buscar registro"));
+          persistIndexedDBLog(db, "ERROR", "Falha ao buscar registro", {
+            storeName: storeName,
+            id: id,
+            error: req.error ? req.error.message : null
+          }, storeName).then(function () {
+            reject(req.error || new Error("Falha ao buscar registro"));
+          });
         };
       }).finally(function () {
         db.close();
@@ -59,10 +131,21 @@
         var req = store.put(value);
 
         req.onsuccess = function () {
-          resolve(value);
+          persistIndexedDBLog(db, "DEBUG", "Gravacao concluida", {
+            storeName: storeName,
+            id: value && value.id
+          }, storeName).then(function () {
+            resolve(value);
+          });
         };
         req.onerror = function () {
-          reject(req.error || new Error("Falha ao salvar registro"));
+          persistIndexedDBLog(db, "ERROR", "Falha ao salvar registro", {
+            storeName: storeName,
+            id: value && value.id,
+            error: req.error ? req.error.message : null
+          }, storeName).then(function () {
+            reject(req.error || new Error("Falha ao salvar registro"));
+          });
         };
       }).finally(function () {
         db.close();
@@ -78,10 +161,20 @@
         var req = store.add(value);
 
         req.onsuccess = function () {
-          resolve(req.result);
+          persistIndexedDBLog(db, "DEBUG", "Inclusao concluida", {
+            storeName: storeName,
+            id: req.result
+          }, storeName).then(function () {
+            resolve(req.result);
+          });
         };
         req.onerror = function () {
-          reject(req.error || new Error("Falha ao adicionar registro"));
+          persistIndexedDBLog(db, "ERROR", "Falha ao adicionar registro", {
+            storeName: storeName,
+            error: req.error ? req.error.message : null
+          }, storeName).then(function () {
+            reject(req.error || new Error("Falha ao adicionar registro"));
+          });
         };
       }).finally(function () {
         db.close();
@@ -97,10 +190,20 @@
         var req = store.getAll();
 
         req.onsuccess = function () {
-          resolve(req.result || []);
+          persistIndexedDBLog(db, "DEBUG", "Listagem concluida", {
+            storeName: storeName,
+            total: (req.result || []).length
+          }, storeName).then(function () {
+            resolve(req.result || []);
+          });
         };
         req.onerror = function () {
-          reject(req.error || new Error("Falha ao listar registros"));
+          persistIndexedDBLog(db, "ERROR", "Falha ao listar registros", {
+            storeName: storeName,
+            error: req.error ? req.error.message : null
+          }, storeName).then(function () {
+            reject(req.error || new Error("Falha ao listar registros"));
+          });
         };
       }).finally(function () {
         db.close();
@@ -116,10 +219,21 @@
         var req = store.delete(id);
 
         req.onsuccess = function () {
-          resolve(true);
+          persistIndexedDBLog(db, "DEBUG", "Remocao por id concluida", {
+            storeName: storeName,
+            id: id
+          }, storeName).then(function () {
+            resolve(true);
+          });
         };
         req.onerror = function () {
-          reject(req.error || new Error("Falha ao remover registro"));
+          persistIndexedDBLog(db, "ERROR", "Falha ao remover registro", {
+            storeName: storeName,
+            id: id,
+            error: req.error ? req.error.message : null
+          }, storeName).then(function () {
+            reject(req.error || new Error("Falha ao remover registro"));
+          });
         };
       }).finally(function () {
         db.close();
@@ -135,10 +249,19 @@
         var req = store.clear();
 
         req.onsuccess = function () {
-          resolve(true);
+          persistIndexedDBLog(db, "DEBUG", "Limpeza de store concluida", {
+            storeName: storeName
+          }, storeName).then(function () {
+            resolve(true);
+          });
         };
         req.onerror = function () {
-          reject(req.error || new Error("Falha ao limpar store"));
+          persistIndexedDBLog(db, "ERROR", "Falha ao limpar store", {
+            storeName: storeName,
+            error: req.error ? req.error.message : null
+          }, storeName).then(function () {
+            reject(req.error || new Error("Falha ao limpar store"));
+          });
         };
       }).finally(function () {
         db.close();

@@ -14,7 +14,7 @@
     var refreshBtn = document.querySelector('[data-action="refresh-state"]');
 
     function reload() {
-      logger.debug("Recarregamento manual solicitado");
+      logger.info("Recarregamento manual iniciado");
       global.TemplateBackend.dispatch(global.TemplateBackend.ACTIONS.RELOAD_MODULE_DATA, { moduleId: moduleId }).then(function (result) {
         if (!result.ok) {
           logger.error("Falha ao recarregar dados", result.error);
@@ -26,6 +26,7 @@
       });
     }
 
+    logger.info("Inicializacao do modulo iniciada");
     global.TemplateBackend.dispatch(global.TemplateBackend.ACTIONS.GET_INITIAL_DATA, { moduleId: moduleId }).then(function (result) {
       if (!result.ok) {
         logger.error("Falha ao carregar dados iniciais", result.error);
@@ -33,6 +34,7 @@
         return;
       }
       logger.info("Dados iniciais carregados", { lastLoadedAt: result.response.lastLoadedAt });
+      logger.info("Inicializacao do modulo concluida");
       setText(statusEl, formatState(result.response));
     });
 

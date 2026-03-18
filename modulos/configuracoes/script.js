@@ -119,12 +119,14 @@
 
   function saveSettings() {
     var settings = toSettingsFromForm();
+    logger.info("Salvamento de configuracoes iniciado", settings);
     runAction(global.TemplateBackend.ACTIONS.SAVE_SETTINGS, { settings: settings })
       .then(function (savedSettings) {
         state.initialSettings = savedSettings;
         fillForm(savedSettings);
         updateSaveState();
         setFeedback("Configuracoes salvas com sucesso.");
+        logger.info("Configuracoes salvas com sucesso", savedSettings);
         return runAction(global.TemplateBackend.ACTIONS.WRITE_LOG, {
           level: "INFO",
           module: "configuracoes",
@@ -144,8 +146,10 @@
   function clearLogs() {
     if (!confirmPendingBeforeCleanup("Limpar logs")) return;
 
+    logger.info("Limpeza de logs iniciada");
     runAction(global.TemplateBackend.ACTIONS.CLEAR_LOGS)
       .then(function () {
+        logger.info("Limpeza de logs concluida");
         setFeedback("Logs removidos.");
         window.location.reload();
       })
@@ -156,10 +160,12 @@
   }
 
   function downloadLogs() {
+    logger.info("Exportacao de logs iniciada");
     runAction(global.TemplateBackend.ACTIONS.EXPORT_LOGS)
       .then(function (exported) {
         var filename = formatDateForFile(new Date()) + ".log";
         downloadTextFile(filename, exported.content || "");
+        logger.info("Exportacao de logs concluida", { filename: filename, total: exported.total });
         setFeedback("Arquivo de log gerado: " + filename);
       })
       .catch(function (error) {
@@ -169,6 +175,7 @@
   }
 
   function generateTestLog() {
+    logger.info("Geracao de log de teste iniciada");
     runAction(global.TemplateBackend.ACTIONS.WRITE_LOG, {
       level: "INFO",
       module: "configuracoes",
@@ -176,9 +183,11 @@
     })
       .then(function (result) {
         if (!result.written) {
+          logger.warn("Log de teste ignorado pelo nivel configurado", result);
           setFeedback("Log de teste ignorado pelo nivel configurado.");
           return;
         }
+        logger.info("Log de teste registrado");
         setFeedback("Log de teste registrado.");
         return refreshLogsMeta();
       })
@@ -191,8 +200,10 @@
   function clearModuleData() {
     if (!confirmPendingBeforeCleanup("Limpar dados de modulos")) return;
 
+    logger.info("Limpeza de dados de modulos iniciada");
     runAction(global.TemplateBackend.ACTIONS.CLEAR_ALL_MODULE_DATA)
       .then(function () {
+        logger.info("Limpeza de dados de modulos concluida");
         setFeedback("Dados de modulos removidos.");
         window.location.reload();
       })
@@ -205,8 +216,10 @@
   function clearPreferences() {
     if (!confirmPendingBeforeCleanup("Limpar configuracoes")) return;
 
+    logger.info("Limpeza de configuracoes iniciada");
     runAction(global.TemplateBackend.ACTIONS.CLEAR_PREFERENCES)
       .then(function () {
+        logger.info("Limpeza de configuracoes concluida");
         setFeedback("Configuracoes removidas.");
         window.location.reload();
       })
@@ -219,8 +232,10 @@
   function clearAllData() {
     if (!confirmPendingBeforeCleanup("Limpar todos os dados")) return;
 
+    logger.info("Limpeza completa de dados iniciada");
     runAction(global.TemplateBackend.ACTIONS.CLEAR_ALL_DATA)
       .then(function () {
+        logger.info("Limpeza completa de dados concluida");
         setFeedback("Todos os dados foram removidos.");
         window.location.reload();
       })
@@ -236,8 +251,10 @@
     var confirmed = window.confirm("Deseja apagar completamente o banco IndexedDB deste template?");
     if (!confirmed) return;
 
+    logger.info("Remocao do banco IndexedDB iniciada");
     runAction(global.TemplateBackend.ACTIONS.DELETE_INDEXEDDB_DATABASE)
       .then(function () {
+        logger.info("Remocao do banco IndexedDB concluida");
         setFeedback("IndexedDB apagado com sucesso.");
         window.location.reload();
       })
@@ -261,6 +278,7 @@
   }
 
   function init() {
+    logger.info("Inicializacao da pagina de configuracoes iniciada");
     setupEventListeners();
     setupLeaveWarning();
 
@@ -271,6 +289,7 @@
         fillForm(settings);
         updateSaveState();
         setFeedback("Configuracoes carregadas.");
+        logger.info("Inicializacao da pagina de configuracoes concluida");
         return refreshLogsMeta();
       })
       .catch(function (error) {
