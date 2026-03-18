@@ -22,14 +22,48 @@
       </aside>
       <main class="content">
         <header class="page-header">
+          <span class="eyebrow">Template Base</span>
           <h1>Dashboard Principal</h1>
-          <p>Escolha um modulo no menu lateral esquerdo.</p>
+          <p>Uma base modular para sites com frontend simples, backend local e persistencia em IndexedDB.</p>
         </header>
-        <section class="card">
-          <h2>Estado da Aplicacao</h2>
-          <p>Template em camadas: frontend, backend local e persistencia em IndexedDB.</p>
-          <p>Cada modulo opera em rota propria, sem iframe.</p>
-          <p>Atualizacao de dados por acao manual em cada modulo.</p>
+
+        <section class="hero-grid">
+          <section class="card hero-card">
+            <h2>Base pronta para evoluir</h2>
+            <p>O template ja separa interface, regras locais e persistencia. Isso ajuda a iniciar um projeto novo sem misturar responsabilidade de UI com acesso a dados.</p>
+            <div class="hero-actions">
+              <a class="module-link-card" href="./modulos/configuracoes/index.html">
+                <strong>Configuracoes</strong>
+                <span>Ajuste logs, limpeza e comportamento operacional.</span>
+              </a>
+              <a class="module-link-card" href="./modulos/modulo-01/index.html">
+                <strong>Modulo 01</strong>
+                <span>Use como referencia para iniciar um modulo real.</span>
+              </a>
+            </div>
+          </section>
+
+          <section class="card metric-card">
+            <strong>Resumo rapido</strong>
+            <p>Rotas HTML dedicadas, menu lateral compartilhado, atualizacao manual entre abas e camada de backend local para centralizar regras.</p>
+          </section>
+        </section>
+
+        <section class="overview-grid">
+          <section class="card metric-card">
+            <strong>Arquitetura em camadas</strong>
+            <p>Fluxo padrao de UI para backend local, persistencia, retorno e re-render.</p>
+          </section>
+
+          <section class="card metric-card">
+            <strong>Persistencia previsivel</strong>
+            <p>IndexedDB para dados principais e `localStorage` apenas para preferencias leves.</p>
+          </section>
+
+          <section class="card metric-card">
+            <strong>Modulos por rota</strong>
+            <p>Cada pagina vive no proprio modulo, sem iframe e com assets locais claros.</p>
+          </section>
         </section>
       </main>
     </div>

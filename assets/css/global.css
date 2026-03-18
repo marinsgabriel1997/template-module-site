@@ -7,15 +7,20 @@
 html,
 body {
   height: 100%;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Trebuchet MS", "Segoe UI", Tahoma, sans-serif;
 }
 
 body {
-  background: var(--color-bg);
+  background: var(--color-bg-accent);
   color: var(--color-text);
+  line-height: 1.5;
 }
 
 a {
   text-decoration: none;
   color: inherit;
+}
+
+p {
+  max-width: 70ch;
 }
