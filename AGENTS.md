@@ -36,13 +36,7 @@ Esta pasta base inicia novos sites com arquitetura em camadas (`frontend` + `bac
 
 ## Persistencia
 
-- IndexedDB para dados principais dos modulos.
-- `localStorage` somente para preferencias leves (ex.: tema, aba ativa).
-
-## Politica de abas
-
-- Use atualizacao manual de dados por modulo em cada aba.
-- Mantenha a consistencia entre abas via acao explicita de atualizacao.
+- IndexedDB para todos os dados.
 
 ## Convencoes de modulos
 
