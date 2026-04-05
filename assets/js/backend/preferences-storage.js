@@ -1,33 +1,48 @@
 (function initPreferencesStorage(global) {
-  var PREFIX = "template_sites_pref:";
+  function failIfIndexedDBUnavailable() {
+    if (!global.TemplateIndexedDB) {
+      return Promise.reject(new Error("TemplateIndexedDB indisponivel"));
+    }
+    return null;
+  }
 
   function get(key) {
-    var raw = localStorage.getItem(PREFIX + key);
-    if (raw === null) return null;
-    try {
-      return JSON.parse(raw);
-    } catch (error) {
-      return raw;
-    }
+    var unavailable = failIfIndexedDBUnavailable();
+    if (unavailable) return unavailable;
+
+    return global.TemplateIndexedDB
+      .getById(global.TemplateIndexedDB.stores.PREFERENCES, key)
+      .then(function (record) {
+        return record ? record.payload : null;
+      });
   }
 
   function set(key, value) {
-    localStorage.setItem(PREFIX + key, JSON.stringify(value));
-    return value;
+    var unavailable = failIfIndexedDBUnavailable();
+    if (unavailable) return unavailable;
+
+    return global.TemplateIndexedDB
+      .upsert(global.TemplateIndexedDB.stores.PREFERENCES, {
+        id: key,
+        payload: value,
+        updatedAt: new Date().toISOString()
+      })
+      .then(function () {
+        return value;
+      });
   }
 
   function clearAll() {
-    var keysToRemove = [];
-    for (var i = 0; i < localStorage.length; i += 1) {
-      var key = localStorage.key(i);
-      if (key && key.indexOf(PREFIX) === 0) {
-        keysToRemove.push(key);
-      }
-    }
-    keysToRemove.forEach(function (key) {
-      localStorage.removeItem(key);
-    });
-    return keysToRemove.length;
+    var unavailable = failIfIndexedDBUnavailable();
+    if (unavailable) return unavailable;
+
+    return global.TemplateIndexedDB
+      .getAll(global.TemplateIndexedDB.stores.PREFERENCES)
+      .then(function (records) {
+        return global.TemplateIndexedDB.clearStore(global.TemplateIndexedDB.stores.PREFERENCES).then(function () {
+          return records.length;
+        });
+      });
   }
 
   global.TemplatePreferences = {

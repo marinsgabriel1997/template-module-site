@@ -8,11 +8,19 @@
 
   var moduleStates = {};
 
+  function cloneValue(value) {
+    if (value === null || value === undefined) return value;
+    if (typeof global.structuredClone === "function") {
+      return global.structuredClone(value);
+    }
+    return JSON.parse(JSON.stringify(value));
+  }
+
   function createModuleState(moduleId, data, lastLoadedAt) {
     return {
       moduleId: moduleId,
       lastLoadedAt: lastLoadedAt,
-      data: data
+      data: cloneValue(data)
     };
   }
 
@@ -27,6 +35,22 @@
     return createModuleState(state.moduleId, state.data, state.lastLoadedAt);
   }
 
+  function getState() {
+    var snapshot = {};
+    var keys = Object.keys(moduleStates);
+
+    keys.forEach(function (moduleId) {
+      var state = getModuleState(moduleId);
+      if (state) {
+        snapshot[moduleId] = state;
+      }
+    });
+
+    return {
+      modules: snapshot
+    };
+  }
+
   function normalizeLogLevel(level) {
     if (!level) return DEFAULT_SETTINGS.logLevel;
     var upper = String(level).toUpperCase();
@@ -35,7 +59,7 @@
 
   function normalizeMaxLines(value) {
     var parsed = parseInt(value, 10);
-    if (isNaN(parsed) || parsed < 1) return DEFAULT_SETTINGS.logMaxLines;
+    if (isNaN(parsed) || parsed < 0) return DEFAULT_SETTINGS.logMaxLines;
     return parsed;
   }
 
@@ -61,6 +85,11 @@
       payload: normalized,
       updatedAt: new Date().toISOString()
     }).then(function () {
+      if (normalized.logMaxLines === 0) {
+        return clearLogs().then(function () {
+          return normalized;
+        });
+      }
       return normalized;
     });
   }
@@ -72,13 +101,32 @@
     });
   }
 
-  function saveModuleState(moduleId, payload) {
+  function saveModuleState(moduleId, payload, options) {
+    var meta = options || {};
+    var previousState = moduleStates[moduleId] || null;
+    var previousUpdatedAt = previousState && previousState.data && previousState.data.updatedAt ? previousState.data.updatedAt : null;
+    var hasConflict = !!(meta.expectedUpdatedAt && previousUpdatedAt && meta.expectedUpdatedAt !== previousUpdatedAt);
+    var safePayload = cloneValue(payload);
+    var payloadWithMeta = (safePayload && typeof safePayload === "object")
+      ? Object.assign({}, safePayload, { updatedAt: new Date().toISOString() })
+      : { value: safePayload, updatedAt: new Date().toISOString() };
+
     return global.TemplateIndexedDB.upsert(global.TemplateIndexedDB.stores.MODULE_DATA, {
       id: moduleId,
-      payload: payload,
+      payload: payloadWithMeta,
       updatedAt: new Date().toISOString()
     }).then(function () {
-      return loadModuleState(moduleId);
+      return loadModuleState(moduleId).then(function (state) {
+        if (!meta.expectedUpdatedAt) {
+          return state;
+        }
+        return {
+          state: state,
+          conflict: hasConflict,
+          previousUpdatedAt: previousUpdatedAt,
+          expectedUpdatedAt: meta.expectedUpdatedAt || null
+        };
+      });
     });
   }
 
@@ -93,6 +141,12 @@
   }
 
   function trimLogs(maxLines) {
+    if (maxLines === 0) {
+      return clearLogs().then(function () {
+        return [];
+      });
+    }
+
     return getLogs().then(function (logs) {
       if (logs.length <= maxLines) return logs;
       var toDelete = logs.slice(0, logs.length - maxLines);
@@ -107,6 +161,10 @@
 
   function writeLog(level, moduleName, message, additionalData) {
     return getSettings().then(function (settings) {
+      if (settings.logMaxLines === 0) {
+        return { written: false, reason: "max_lines_zero", settings: settings };
+      }
+
       if (!shouldWriteLog(settings, level)) {
         return { written: false, reason: "level_filtered", settings: settings };
       }
@@ -145,14 +203,16 @@
       global.TemplateIndexedDB.clearStore(global.TemplateIndexedDB.stores.LOGS)
     ]).then(function () {
       moduleStates = {};
-      var clearedPreferences = global.TemplatePreferences.clearAll();
-      return { clearedPreferences: clearedPreferences };
+      return global.TemplatePreferences.clearAll().then(function (clearedPreferences) {
+        return { clearedPreferences: clearedPreferences };
+      });
     });
   }
 
   function clearLocalPreferences() {
-    var clearedPreferences = global.TemplatePreferences.clearAll();
-    return Promise.resolve({ clearedPreferences: clearedPreferences });
+    return global.TemplatePreferences.clearAll().then(function (clearedPreferences) {
+      return { clearedPreferences: clearedPreferences };
+    });
   }
 
   function clearSettingsData() {
@@ -191,6 +251,7 @@
   }
 
   global.TemplateStateStore = {
+    getState: getState,
     getModuleState: getModuleState,
     loadModuleState: loadModuleState,
     saveModuleState: saveModuleState,

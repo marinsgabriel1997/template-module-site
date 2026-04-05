@@ -75,10 +75,38 @@
     }
   }
 
-  function safe(actionRunner) {
+  function logActionFailure(action, error) {
+    if (!global.TemplateStateStore || !global.TemplateStateStore.writeLog) {
+      return Promise.resolve();
+    }
+
+    if (action === ACTIONS.WRITE_LOG) {
+      return Promise.resolve();
+    }
+
+    return global.TemplateStateStore
+      .writeLog("ERROR", "action-dispatcher", "Falha na acao", {
+        action: action,
+        message: error && error.message ? error.message : "Falha na acao"
+      })
+      .then(function () {
+        return null;
+      })
+      .catch(function () {
+        return null;
+      });
+  }
+
+  function safe(action, actionRunner) {
     return actionRunner().then(success).catch(function (error) {
-      return fail("ACTION_FAILED", error && error.message ? error.message : "Falha na acao");
+      return logActionFailure(action, error).then(function () {
+        return fail(error && error.code ? error.code : "ACTION_FAILED", error && error.message ? error.message : "Falha na acao");
+      });
     });
+  }
+
+  function getState() {
+    return global.TemplateStateStore.getState();
   }
 
   function dispatch(action, payload) {
@@ -92,67 +120,69 @@
     switch (action) {
       case ACTIONS.GET_INITIAL_DATA:
       case ACTIONS.RELOAD_MODULE_DATA:
-        return safe(function () {
+        return safe(action, function () {
           return global.TemplateStateStore.loadModuleState(data.moduleId);
         });
 
       case ACTIONS.SAVE_MODULE_DATA:
-        return safe(function () {
-          return global.TemplateStateStore.saveModuleState(data.moduleId, data.data);
+        return safe(action, function () {
+          return global.TemplateStateStore.saveModuleState(data.moduleId, data.data, {
+            expectedUpdatedAt: data.expectedUpdatedAt || null
+          });
         });
 
       case ACTIONS.GET_SETTINGS:
-        return safe(function () {
+        return safe(action, function () {
           return global.TemplateStateStore.getSettings();
         });
 
       case ACTIONS.SAVE_SETTINGS:
-        return safe(function () {
+        return safe(action, function () {
           return global.TemplateStateStore.saveSettings(data.settings);
         });
 
       case ACTIONS.WRITE_LOG:
-        return safe(function () {
+        return safe(action, function () {
           return global.TemplateStateStore.writeLog(data.level, data.module, data.message, data.additionalData);
         });
 
       case ACTIONS.GET_LOGS:
-        return safe(function () {
+        return safe(action, function () {
           return global.TemplateStateStore.getLogs();
         });
 
       case ACTIONS.CLEAR_LOGS:
-        return safe(function () {
+        return safe(action, function () {
           return global.TemplateStateStore.clearLogs();
         });
 
       case ACTIONS.EXPORT_LOGS:
-        return safe(function () {
+        return safe(action, function () {
           return global.TemplateStateStore.exportLogs();
         });
 
       case ACTIONS.CLEAR_ALL_MODULE_DATA:
-        return safe(function () {
+        return safe(action, function () {
           return global.TemplateStateStore.clearAllModuleData();
         });
 
       case ACTIONS.CLEAR_LOCAL_PREFERENCES:
-        return safe(function () {
+        return safe(action, function () {
           return global.TemplateStateStore.clearLocalPreferences();
         });
 
       case ACTIONS.CLEAR_SETTINGS:
-        return safe(function () {
+        return safe(action, function () {
           return global.TemplateStateStore.clearSettingsData();
         });
 
       case ACTIONS.CLEAR_ALL_DATA:
-        return safe(function () {
+        return safe(action, function () {
           return global.TemplateStateStore.clearAllData();
         });
 
       case ACTIONS.DELETE_INDEXEDDB_DATABASE:
-        return safe(function () {
+        return safe(action, function () {
           return global.TemplateStateStore.deleteIndexedDBDatabase();
         });
 
@@ -163,6 +193,7 @@
 
   global.TemplateBackend = {
     ACTIONS: ACTIONS,
-    dispatch: dispatch
+    dispatch: dispatch,
+    getState: getState
   };
 })(window);
