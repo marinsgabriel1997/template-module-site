@@ -28,7 +28,7 @@
 
 - [ ] Definir stores de dominio no IndexedDB.
 - [ ] Definir estrategia de migracao de schema.
-- [ ] Definir preferencias reais em `localStorage`.
+- [ ] Definir preferencias reais em store dedicada no IndexedDB.
 
 ### Interface e experiencia
 
@@ -46,3 +46,10 @@
 - [ ] Validar fluxos principais de negocio ponta a ponta.
 - [ ] Validar cenarios de erro e recuperacao.
 - [ ] Validar build e rotas no ambiente local e GitHub Pages.
+- [ ] Validar confirmacao simples em todas as acoes destrutivas.
+- [ ] Validar contrato `dispatch` + `getState` no backend local.
+- [ ] Validar `logMaxLines = 0` (sem armazenamento de logs).
+- [ ] Validar conflito entre abas com regra de ultima gravacao vence.
+- [ ] Validar preservacao de `error.code` no fluxo UI -> backend -> UI.
+- [ ] Validar sinalizacao de sobrescrita (`conflict`) em gravacao entre abas.
+- [ ] Validar que `getState` nao expoe referencias mutaveis de estado interno.

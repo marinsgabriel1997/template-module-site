@@ -16,12 +16,14 @@ Padronizar logs como pilar de observabilidade do template para acelerar diagnost
 - Use `INFO` como nivel operacional padrao.
 - Ative `DEBUG` em investigacao de bug dificil.
 - Retorne para `INFO` apos concluir diagnostico.
+- `logMaxLines` padrao e `5000`; valor `0` desativa armazenamento de logs.
 
 ## Pontos obrigatorios de log
 
 - Inicio e fim de inicializacao de modulo.
 - Inicio e fim de acao de usuario relevante.
-- Leitura e escrita em IndexedDB.
+- Leitura e escrita em IndexedDB nos fluxos de modulo/backend local.
+- No `indexeddb-wrapper`, persistir somente logs de erro tecnico.
 - Operacoes de limpeza de dados.
 - Qualquer `catch` com detalhes do erro.
 

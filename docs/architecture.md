@@ -2,12 +2,12 @@
 
 ## Objetivo
 
-Definir a arquitetura tecnica padrao da pasta `template-sites`.
+Definir a arquitetura tecnica padrao da pasta `template-module-site`.
 
 ## Estrutura recomendada
 
 ```text
-template-sites/
+template-module-site/
   index.html
   assets/
     css/
@@ -92,7 +92,7 @@ Passos:
 ## Persistencia
 
 - IndexedDB: dados principais dos modulos.
-- `localStorage`: preferencias leves.
+- IndexedDB: preferencias tambem persistidas em store dedicada.
 - UI acessa dados via `action-dispatcher` do backend local.
 
 ## Politica de abas
@@ -100,10 +100,12 @@ Passos:
 - Sincronize dados por acao manual do usuario em cada modulo (`Atualizar dados`).
 - Mantenha estado de cada aba em memoria local durante a sessao.
 - Recarregue estado consolidado ao executar a acao de atualizacao.
+- Em escrita, pode ser enviado `expectedUpdatedAt` para diagnostico de sobrescrita entre abas.
 
 ## Contratos
 
 - `action`: verbo + entidade (`getInitialData`, `reloadModuleData`, `saveModuleData`).
+- Backend local deve expor `dispatch` e `getState`.
 - Resposta de erro:
 
 ```javascript
@@ -115,3 +117,14 @@ Passos:
   }
 }
 ```
+
+## Regras operacionais definidas
+
+- Toda acao destrutiva deve pedir exatamente uma confirmacao simples (`window.confirm`) por execucao.
+- `logMaxLines`:
+  - minimo `0`
+  - padrao `5000`
+  - `0` desativa armazenamento de logs.
+- Em `indexeddb-wrapper`, logs tecnicos persistidos devem registrar apenas erros.
+- Conflito entre abas: ultima gravacao vence; backend retorna sinalizacao de conflito quando houver sobrescrita detectada.
+- `Atualizar dados` de modulo apenas recarrega do IndexedDB local e atualiza a tela.

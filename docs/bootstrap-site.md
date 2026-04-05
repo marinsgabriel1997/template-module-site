@@ -6,7 +6,7 @@ Iniciar um novo site baseado em modulos por rota, com separacao de `frontend` e 
 
 ## Passos iniciais
 
-1. Copiar a pasta `template-sites` para o novo projeto.
+1. Copiar a pasta `template-module-site` para o novo projeto.
 2. Preencher [product.md](product.md).
 3. Definir modulos iniciais em `modulos/`.
 4. Ajustar textos, identidade visual e navegacao.
@@ -31,7 +31,7 @@ Iniciar um novo site baseado em modulos por rota, com separacao de `frontend` e 
 - Expor API publica do modulo e opcional; prefira inicializacao direta quando o modulo for simples.
 - Validar links no ambiente local e no GitHub Pages antes de publicar.
 - IndexedDB como persistencia principal.
-- `localStorage` apenas para preferencias simples.
+- IndexedDB tambem para preferencias.
 - Use atualizacao manual por modulo entre abas.
 - Recarregue estado consolidado ao acionar `Atualizar dados`.
 - Trate logs como pilar de observabilidade com nivel configuravel.
@@ -44,7 +44,10 @@ Iniciar um novo site baseado em modulos por rota, com separacao de `frontend` e 
 - [ ] Garantir acesso ao IndexedDB somente pela camada backend local.
 - [ ] Garantir que cada pagina usa `<aside class="sidebar" data-sidebar></aside>`.
 - [ ] Validar botao de `Atualizar dados` em cada modulo.
+- [ ] Validar `logMaxLines` com minimo `0` e padrao `5000`.
 - [ ] Validar contrato de erro padronizado.
+- [ ] Garantir que o backend local expoe `dispatch` e `getState`.
+- [ ] Validar confirmacao simples obrigatoria em toda acao destrutiva.
 - [ ] Validar cobertura minima de logs por modulo (`INFO`, `ERROR`).
 
 ## Referencias

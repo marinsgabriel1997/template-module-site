@@ -9,8 +9,7 @@ Esta pasta base inicia novos sites com arquitetura em camadas (`frontend` + `bac
 - HTML5 nativo
 - CSS3 nativo
 - JavaScript nativo
-- IndexedDB como persistencia principal
-- `localStorage` apenas para preferencias simples
+- IndexedDB como persistencia unica
 
 ## Arquitetura padrao
 
@@ -51,7 +50,8 @@ Esta pasta base inicia novos sites com arquitetura em camadas (`frontend` + `bac
 - Niveis: `ERROR`, `WARN`, `INFO`, `DEBUG`.
 - Use logger compartilhado por modulo.
 - Registre inicio/fim de fluxo, acao de usuario, persistencia e falha.
-- Ative `DEBUG` para diagnostico de bugs e travamentos.
+- `logMaxLines` aceita minimo `0` (zero desativa armazenamento de logs).
+- Em `indexeddb-wrapper`, registros tecnicos persistidos devem ser apenas de erro.
 
 ## Documentacao complementar
 
@@ -60,3 +60,45 @@ Esta pasta base inicia novos sites com arquitetura em camadas (`frontend` + `bac
 - [logging-policy.md](docs/logging-policy.md)
 - [product.md](docs/product.md)
 - [tasks.md](docs/tasks.md)
+
+## Fluxo obrigatorio de entrega com usuario
+
+Para qualquer demanda de evolucao/correcao, seguir esta ordem:
+
+1. Conversar com o usuario para alinhar escopo e proposta tecnica.
+2. Definir e apresentar plano de implementacao.
+3. Aguardar aprovacao explicita do usuario antes de codar.
+4. Atualizar documentacao e `docs/tasks.md` antes ou junto da implementacao, quando houver mudanca de fluxo/contrato.
+5. Implementar e solicitar validacao funcional do usuario no ambiente real.
+7. Apenas apos validacao do usuario, realizar commit. Se houver reprova ou ajuste, voltar ao passo 1.
+
+## Regra de commit
+
+1. Nao realizar commit sem solicitacao ou confirmacao explicita do usuario.
+2. Quando houver validacao pendente do usuario, manter alteracoes sem commit ate retorno.
+
+## Padroes de commits
+
+Utilizar commits semanticos com os tipos abaixo:
+
+- `feat`: incluir novo recurso. Relaciona-se com `MINOR` do versionamento semantico.
+- `fix`: solucionar problema ou bug. Relaciona-se com `PATCH` do versionamento semantico.
+- `docs`: mudancas apenas na documentacao, como `README`.
+- `test`: criacao, alteracao ou exclusao de testes, sem incluir alteracoes de codigo de producao.
+- `build`: modificacoes em arquivos de build e dependencias.
+- `perf`: alteracoes de codigo relacionadas a performance.
+- `style`: alteracoes de formatacao, lint, semicolons, trailing spaces e similares, sem mudar comportamento.
+- `refactor`: refatoracoes sem alteracao funcional.
+- `chore`: tarefas de build, configuracoes administrativas, pacotes e ajustes operacionais sem alteracao de codigo de producao.
+- `ci`: mudancas relacionadas a integracao continua.
+- `raw`: mudancas em arquivos de configuracoes, dados, features ou parametros.
+- `cleanup`: limpeza de codigo comentado, trechos desnecessarios ou melhoria de legibilidade e manutencao.
+- `remove`: exclusao de arquivos, diretorios ou funcionalidades obsoletas ou nao utilizadas.
+
+## Regra de testes automatizados
+
+1. Sempre criar ou atualizar testes automatizados quando implementar correcao/evolucao com comportamento verificavel.
+2. Quando aplicavel, o teste deve falhar antes da mudanca e passar depois da implementacao.
+3. Sempre executar a suite de testes relevante antes de concluir a entrega.
+4. Nao solicitar commit com testes quebrados ou sem execucao, salvo autorizacao explicita do usuario.
+5. No retorno da entrega, informar quais testes foram executados e o resultado.

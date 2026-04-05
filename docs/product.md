@@ -33,7 +33,7 @@ Preencha este documento antes da implementacao.
 ## Persistencia
 
 - Dados principais em IndexedDB:
-- Preferencias em `localStorage`:
+- Preferencias em IndexedDB (store dedicada):
 - Estrategia de migracao de schema:
 
 ## Abas
