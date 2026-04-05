@@ -6,7 +6,22 @@
         module: moduleName,
         message: message,
         additionalData: additionalData || null
-      }).catch(function () {
+      }).then(function (result) {
+        if (!result || !result.ok) {
+          console.error("[logger] Falha ao persistir log", {
+            module: moduleName,
+            level: level,
+            message: message
+          });
+        }
+        return result;
+      }).catch(function (error) {
+        console.error("[logger] Erro ao persistir log", {
+          module: moduleName,
+          level: level,
+          message: message,
+          error: error && error.message ? error.message : null
+        });
         return { ok: false };
       });
     }

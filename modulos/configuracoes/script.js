@@ -11,6 +11,7 @@
     saveStatus: document.querySelector('[data-role="save-status"]'),
     feedback: document.querySelector('[data-role="feedback"]'),
     logsMeta: document.querySelector('[data-role="logs-meta"]'),
+    logMaxLinesWarning: document.querySelector('[data-role="log-max-lines-warning"]'),
     logLevel: document.querySelector('[data-field="log-level"]'),
     logMaxLines: document.querySelector('[data-field="log-max-lines"]'),
     generateLogButton: document.querySelector('[data-action="generate-log"]'),
@@ -28,9 +29,10 @@
   }
 
   function toSettingsFromForm() {
+    var parsedLogMaxLines = parseInt(elements.logMaxLines.value, 10);
     return {
       logLevel: elements.logLevel.value,
-      logMaxLines: parseInt(elements.logMaxLines.value, 10)
+      logMaxLines: parsedLogMaxLines
     };
   }
 
@@ -41,7 +43,35 @@
 
   function settingsEqual(a, b) {
     if (!a || !b) return false;
-    return a.logLevel === b.logLevel && Number(a.logMaxLines) === Number(b.logMaxLines);
+    return a.logLevel === b.logLevel && normalizeLogMaxLines(a.logMaxLines) === normalizeLogMaxLines(b.logMaxLines);
+  }
+
+  function normalizeLogMaxLines(value) {
+    var parsed = parseInt(value, 10);
+    if (isNaN(parsed) || parsed < 0) return 5000;
+    return parsed;
+  }
+
+  function isInvalidLogMaxLines(value) {
+    var parsed = parseInt(value, 10);
+    return isNaN(parsed) || parsed < 0;
+  }
+
+  function updateLogMaxLinesWarning() {
+    if (!elements.logMaxLinesWarning) return;
+
+    var rawValue = elements.logMaxLines.value;
+    if (isInvalidLogMaxLines(rawValue)) {
+      elements.logMaxLinesWarning.textContent = "Dados invalidos: sera usado o padrao 5000.";
+      return;
+    }
+
+    if (parseInt(rawValue, 10) === 0) {
+      elements.logMaxLinesWarning.textContent = "Valor 0: armazenamento de logs desativado.";
+      return;
+    }
+
+    elements.logMaxLinesWarning.textContent = "";
   }
 
   function updateSaveState() {
@@ -49,15 +79,16 @@
     state.isDirty = !settingsEqual(state.currentSettings, state.initialSettings);
     elements.saveButton.disabled = !state.isDirty;
     elements.saveStatus.textContent = state.isDirty ? "Alteracoes pendentes" : "Sem alteracoes";
+    updateLogMaxLinesWarning();
   }
 
   function hasUnsavedChanges() {
     return state.isDirty;
   }
 
-  function confirmPendingBeforeCleanup(actionLabel) {
-    if (!hasUnsavedChanges()) return true;
-    return window.confirm("Existem alteracoes nao salvas. Deseja continuar com '" + actionLabel + "'?");
+  function canRunDestructiveAction(actionLabel) {
+    var warning = hasUnsavedChanges() ? " Existem alteracoes nao salvas e elas podem ser perdidas." : "";
+    return window.confirm("Deseja executar '" + actionLabel + "'?" + warning);
   }
 
   function setupLeaveWarning() {
@@ -82,10 +113,50 @@
   function runAction(action, payload) {
     return global.TemplateBackend.dispatch(action, payload || {}).then(function (result) {
       if (!result.ok) {
-        throw new Error(result.error.message);
+        var error = new Error(result.error.message);
+        error.code = result.error.code || "UNKNOWN_ERROR";
+        throw error;
       }
       return result.response;
     });
+  }
+
+  function formatError(error, fallbackCode) {
+    var code = error && error.code ? error.code : fallbackCode;
+    var message = error && error.message ? error.message : "Erro desconhecido";
+    return code + ": " + message;
+  }
+
+  function validateRequiredElements() {
+    var required = [
+      "saveButton",
+      "saveStatus",
+      "feedback",
+      "logsMeta",
+      "logLevel",
+      "logMaxLines",
+      "generateLogButton",
+      "clearLogsButton",
+      "downloadLogsButton",
+      "clearModuleDataButton",
+      "clearSettingsButton",
+      "clearPreferencesButton",
+      "deleteIndexedDBButton",
+      "clearAllDataButton"
+    ];
+
+    var missing = required.filter(function (key) {
+      return !elements[key];
+    });
+
+    if (!missing.length) return true;
+
+    var message = "Elementos obrigatorios ausentes: " + missing.join(", ");
+    console.error(message);
+    if (elements.feedback) {
+      elements.feedback.textContent = "Falha ao carregar: estrutura da pagina invalida.";
+    }
+    return false;
   }
 
   function formatDateForFile(date) {
@@ -120,6 +191,9 @@
 
   function saveSettings() {
     var settings = toSettingsFromForm();
+    if (isInvalidLogMaxLines(elements.logMaxLines.value)) {
+      setFeedback("Dados invalidos: logMaxLines invalido. Sera usado o padrao 5000.");
+    }
     logger.info("Salvamento de configuracoes iniciado", settings);
     runAction(global.TemplateBackend.ACTIONS.SAVE_SETTINGS, { settings: settings })
       .then(function (savedSettings) {
@@ -140,23 +214,23 @@
       })
       .catch(function (error) {
         logger.error("Falha ao salvar configuracoes", { message: error.message });
-        setFeedback("Erro ao salvar configuracoes: " + error.message);
+        setFeedback("Falha ao salvar: " + formatError(error, "SAVE_SETTINGS_FAILED"));
       });
   }
 
   function clearLogs() {
-    if (!confirmPendingBeforeCleanup("Limpar logs")) return;
+    if (!canRunDestructiveAction("Limpar logs")) return;
 
-    logger.info("Limpeza de logs iniciada");
     runAction(global.TemplateBackend.ACTIONS.CLEAR_LOGS)
       .then(function () {
-        logger.info("Limpeza de logs concluida");
         setFeedback("Logs removidos.");
-        window.location.reload();
+        if (elements.logsMeta) {
+          elements.logsMeta.textContent = "Logs armazenados: 0";
+        }
       })
       .catch(function (error) {
         logger.error("Falha ao limpar logs", { message: error.message });
-        setFeedback("Erro ao limpar logs: " + error.message);
+        setFeedback("Falha ao limpar: " + formatError(error, "CLEAR_LOGS_FAILED"));
       });
   }
 
@@ -171,7 +245,7 @@
       })
       .catch(function (error) {
         logger.error("Falha ao exportar logs", { message: error.message });
-        setFeedback("Erro ao baixar logs: " + error.message);
+        setFeedback("Falha ao exportar: " + formatError(error, "EXPORT_LOGS_FAILED"));
       });
   }
 
@@ -194,12 +268,12 @@
       })
       .catch(function (error) {
         logger.error("Falha ao gerar log de teste", { message: error.message });
-        setFeedback("Erro ao gerar log: " + error.message);
+        setFeedback("Falha ao salvar: " + formatError(error, "WRITE_LOG_FAILED"));
       });
   }
 
   function clearModuleData() {
-    if (!confirmPendingBeforeCleanup("Limpar dados de modulos")) return;
+    if (!canRunDestructiveAction("Limpar dados de modulos")) return;
 
     logger.info("Limpeza de dados de modulos iniciada");
     runAction(global.TemplateBackend.ACTIONS.CLEAR_ALL_MODULE_DATA)
@@ -210,12 +284,12 @@
       })
       .catch(function (error) {
         logger.error("Falha ao limpar dados de modulos", { message: error.message });
-        setFeedback("Erro ao limpar dados de modulos: " + error.message);
+        setFeedback("Falha ao limpar: " + formatError(error, "CLEAR_MODULE_DATA_FAILED"));
       });
   }
 
   function clearSettings() {
-    if (!confirmPendingBeforeCleanup("Limpar configuracoes persistidas")) return;
+    if (!canRunDestructiveAction("Limpar configuracoes persistidas")) return;
 
     logger.info("Limpeza de configuracoes persistidas iniciada");
     runAction(global.TemplateBackend.ACTIONS.CLEAR_SETTINGS)
@@ -226,28 +300,28 @@
       })
       .catch(function (error) {
         logger.error("Falha ao limpar configuracoes persistidas", { message: error.message });
-        setFeedback("Erro ao limpar configuracoes persistidas: " + error.message);
+        setFeedback("Falha ao limpar: " + formatError(error, "CLEAR_SETTINGS_FAILED"));
       });
   }
 
   function clearPreferences() {
-    if (!confirmPendingBeforeCleanup("Limpar preferencias locais")) return;
+    if (!canRunDestructiveAction("Limpar preferencias")) return;
 
-    logger.info("Limpeza de preferencias locais iniciada");
+    logger.info("Limpeza de preferencias iniciada");
     runAction(global.TemplateBackend.ACTIONS.CLEAR_LOCAL_PREFERENCES)
       .then(function () {
-        logger.info("Limpeza de preferencias locais concluida");
-        setFeedback("Preferencias locais removidas.");
+        logger.info("Limpeza de preferencias concluida");
+        setFeedback("Preferencias removidas.");
         window.location.reload();
       })
       .catch(function (error) {
-        logger.error("Falha ao limpar preferencias locais", { message: error.message });
-        setFeedback("Erro ao limpar preferencias locais: " + error.message);
+        logger.error("Falha ao limpar preferencias", { message: error.message });
+        setFeedback("Falha ao limpar: " + formatError(error, "CLEAR_PREFERENCES_FAILED"));
       });
   }
 
   function clearAllData() {
-    if (!confirmPendingBeforeCleanup("Limpar todos os dados")) return;
+    if (!canRunDestructiveAction("Limpar todos os dados")) return;
 
     logger.info("Limpeza completa de dados iniciada");
     runAction(global.TemplateBackend.ACTIONS.CLEAR_ALL_DATA)
@@ -258,15 +332,12 @@
       })
       .catch(function (error) {
         logger.error("Falha ao limpar todos os dados", { message: error.message });
-        setFeedback("Erro ao limpar todos os dados: " + error.message);
+        setFeedback("Falha ao limpar: " + formatError(error, "CLEAR_ALL_DATA_FAILED"));
       });
   }
 
   function deleteIndexedDBDatabase() {
-    if (!confirmPendingBeforeCleanup("Apagar IndexedDB")) return;
-
-    var confirmed = window.confirm("Deseja apagar completamente o banco IndexedDB deste template?");
-    if (!confirmed) return;
+    if (!canRunDestructiveAction("Apagar IndexedDB")) return;
 
     logger.info("Remocao do banco IndexedDB iniciada");
     runAction(global.TemplateBackend.ACTIONS.DELETE_INDEXEDDB_DATABASE)
@@ -277,7 +348,7 @@
       })
       .catch(function (error) {
         logger.error("Falha ao apagar IndexedDB", { message: error.message });
-        setFeedback("Erro ao apagar IndexedDB: " + error.message);
+        setFeedback("Falha ao limpar: " + formatError(error, "DELETE_INDEXEDDB_FAILED"));
       });
   }
 
@@ -296,6 +367,8 @@
   }
 
   function init() {
+    if (!validateRequiredElements()) return;
+
     logger.info("Inicializacao da pagina de configuracoes iniciada");
     setupEventListeners();
     setupLeaveWarning();
@@ -314,7 +387,7 @@
         logger.error("Falha ao carregar configuracoes", { message: error.message });
         state.initialSettings = toSettingsFromForm();
         updateSaveState();
-        setFeedback("Erro ao carregar configuracoes: " + error.message + ". Edite e salve para recriar.");
+        setFeedback("Falha ao carregar: " + formatError(error, "GET_SETTINGS_FAILED") + ". Edite e salve para recriar.");
       });
   }
 
